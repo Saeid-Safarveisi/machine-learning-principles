@@ -20,3 +20,8 @@ from sklearn.cluster import KMeans
 model = KMeans(n_clusters=3)
 model.fit(X)
 ```
+| Concept | Meaning |
+|---|---|
+| K | Number of clusters |
+| Centroid | Mean of cluster observations |
+| Inertia | Within-cluster sum of squares |
