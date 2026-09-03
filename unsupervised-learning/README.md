@@ -53,3 +53,7 @@ Where:
 ![Example Image](photo_2026-09-03_16-46-13.jpg)
 
 <img src="photo_2026-09-03_16-46-13.jpg" width="500">
+
+<p align="center">
+  <img src="photo_2026-09-03_16-46-13.jpg" width="500">
+</p>
