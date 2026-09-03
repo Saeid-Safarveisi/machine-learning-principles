@@ -25,3 +25,9 @@ model.fit(X)
 | K | Number of clusters |
 | Centroid | Mean of cluster observations |
 | Inertia | Within-cluster sum of squares |
+
+$$
+\mu_k =
+\frac{1}{|C_k|}
+\sum_{x_i \in C_k} x_i
+$$
