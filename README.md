@@ -13,3 +13,10 @@ This is normal text.
 - First point
 - Second point
 - Third point
+
+```python
+from sklearn.cluster import KMeans
+
+model = KMeans(n_clusters=3)
+model.fit(X)
+```
