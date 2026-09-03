@@ -47,3 +47,7 @@ Where:
 | K-Means | Clustering | Customer segmentation |
 | PCA | Dimensionality reduction | Feature compression |
 | DBSCAN | Density-based clustering | Detecting irregular clusters |
+
+## Image Example
+
+![Example Image](photo_2026-09-03_16-46-13.jpg)
