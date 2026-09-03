@@ -22,3 +22,20 @@ from sklearn.cluster import KMeans
 model = KMeans(n_clusters=3, random_state=42)
 model.fit(X)
 ```
+## Mathematical Equation Example
+
+The K-means objective function is:
+
+$$
+J =
+\sum_{k=1}^{K}
+\sum_{x_i \in C_k}
+\|x_i - \mu_k\|^2
+$$
+
+Where:
+
+- $K$ is the number of clusters.
+- $C_k$ is cluster $k$.
+- $x_i$ is a data point.
+- $\mu_k$ is the centroid of cluster $k$.
