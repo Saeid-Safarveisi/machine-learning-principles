@@ -39,3 +39,11 @@ Where:
 - $C_k$ is cluster $k$.
 - $x_i$ is a data point.
 - $\mu_k$ is the centroid of cluster $k$.
+
+## Comparison Table
+
+| Technique | Main Purpose | Example |
+|---|---|---|
+| K-Means | Clustering | Customer segmentation |
+| PCA | Dimensionality reduction | Feature compression |
+| DBSCAN | Density-based clustering | Detecting irregular clusters |
