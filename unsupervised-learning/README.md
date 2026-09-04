@@ -17,7 +17,7 @@ Suppose we have `N` observations and `K` clusters, where `K < N`.
 
 The cluster assignment can be represented as:
 
-```math
+```
 C(i) = k
 ```
 
