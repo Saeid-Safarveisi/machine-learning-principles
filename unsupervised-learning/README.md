@@ -34,8 +34,6 @@ This is a **many-to-one mapping**:
 * every observation is assigned to exactly one cluster;
 * many different observations can be assigned to the same cluster.
 
-K-means therefore produces a **hard clustering**: an observation belongs to one cluster rather than having partial membership in several clusters.
-
 ---
 
 ## 2. How Is Similarity Defined?
@@ -45,10 +43,9 @@ K-means needs a way to determine whether observations are close to one another.
 For classical K-means, the dissimilarity measure is **squared Euclidean distance**:
 
 ```math
-d(x_i,x_j)=\|x_i-x_j\|_2^2
+d(x_i,x_j)= sum_{u=1}^{p}(x_{iu}- x_{ju})^2 = \|x_i-x_j\|_2^2
 ```
-
-A smaller distance means that two observations are more similar in the feature space.
+where `p` is the number of covariates. Smaller distance means that two observations are more similar in the feature space.
 
 This choice is important because squared Euclidean distance is directly connected to the use of the **mean** as the cluster representative.
 
