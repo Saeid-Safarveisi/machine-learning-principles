@@ -1,342 +1,454 @@
 # K-Means Clustering
 
-K-means is an **unsupervised clustering algorithm** that partitions \(N\) observations into a predefined number of clusters \(K\).
+K-means is an **unsupervised, partition-based clustering algorithm** used to divide observations into a predefined number of clusters, `K`, so that observations belonging to the same cluster are as similar as possible.
 
-The basic idea is simple:
+For classical K-means:
 
-> Observations assigned to the same cluster should be as similar to each other as possible.
-
-For K-means, similarity is measured using **squared Euclidean distance**.
+* the features are **quantitative / numerical**;
+* similarity is represented through **squared Euclidean distance**;
+* each observation belongs to **one and only one cluster**;
+* each cluster is represented by its **mean (centroid)**.
 
 ---
 
-## 1. Cluster Assignment
+## 1. Cluster Assignment as a Many-to-One Mapping
 
-Each observation belongs to **one and only one cluster**.
+Suppose we have `N` observations and `K` clusters, where `K < N`.
 
-The assignment can be represented as:
+The cluster assignment can be represented as:
 
-$$
+```math
 C(i) = k
-$$
+```
 
-where:
+where `C(i)` tells us that observation `i` belongs to cluster `k`.
 
-- \(i\) represents an observation,
-- \(k \in \{1,\dots,K\}\) represents a cluster,
-- \(C(i)\) tells us which cluster observation \(i\) belongs to.
+Therefore:
 
-Therefore, clustering can be viewed as a **many-to-one mapping**:
+```math
+C:\{1,\ldots,N\}\rightarrow\{1,\ldots,K\}
+```
 
-$$
-\text{Observations} \rightarrow \text{Clusters}
-$$
+This is a **many-to-one mapping**:
+
+* every observation is assigned to exactly one cluster;
+* many different observations can be assigned to the same cluster.
+
+K-means therefore produces a **hard clustering**: an observation belongs to one cluster rather than having partial membership in several clusters.
 
 ---
 
-## 2. Objective Function
+## 2. How Is Similarity Defined?
 
-The goal of K-means is to minimize the **total within-cluster sum of squares (WCSS)**:
+K-means needs a way to determine whether observations are close to one another.
 
-$$
+For classical K-means, the dissimilarity measure is **squared Euclidean distance**:
+
+```math
+d(x_i,x_j)=\|x_i-x_j\|_2^2
+```
+
+A smaller distance means that two observations are more similar in the feature space.
+
+This choice is important because squared Euclidean distance is directly connected to the use of the **mean** as the cluster representative.
+
+Therefore, the classical K-means setting can be summarized as:
+
+> **Numerical features + squared Euclidean distance + mean centroid**
+
+---
+
+## 3. What Does K-Means Try to Optimize?
+
+For each cluster `k`, let:
+
+* `C_k` be the observations assigned to that cluster;
+* `\mu_k` be its centroid.
+
+K-means minimizes the **total within-cluster sum of squares (WCSS)**:
+
+```math
 J(C,\mu)
 =
 \sum_{k=1}^{K}
-\sum_{x_i \in C_k}
-\|x_i-\mu_k\|^2
-$$
+\sum_{x_i\in C_k}
+\|x_i-\mu_k\|_2^2
+```
 
-where:
+Read this objective as:
 
-* \(K\) = number of clusters,
-* \(C_k\) = observations assigned to cluster \(k\),
-* \(x_i\) = observation \(i\),
-* \(\mu_k\) = centroid of cluster \(k\).
+> For every cluster → for every observation in that cluster → calculate its squared distance to the cluster centroid → add all distances together.
 
-In simple terms:
+The desired partition is therefore the one that makes:
 
-> For every cluster, calculate the squared distance between every observation and its centroid, and then add all of these distances together.
+```math
+\text{total within-cluster variation}
+```
 
-K-means tries to find the partition that makes this total value as small as possible.
+as small as possible.
+
+Equivalently:
+
+```math
+\text{Good clustering}
+\Longrightarrow
+\text{observations are close to their own centroids}
+```
 
 ---
 
-## 3. Why Is the Optimization Difficult?
+## 4. Why Is Finding the Best Partition Difficult?
 
-In principle, we could examine **every possible partition** of the observations into \(K\) clusters and choose the one with the smallest objective value.
+In principle, we could:
 
-The number of possible partitions is finite, but it increases extremely quickly as the number of observations increases.
+1. generate every possible assignment of `N` observations to `K` clusters;
+2. calculate the objective for each partition;
+3. choose the partition with the smallest objective.
+
+The search space is **finite**, because there are only finitely many ways to assign a finite number of observations to `K` clusters.
+
+However, the number of possible partitions grows extremely quickly.
 
 For example:
 
-$$
+```math
 S(10,4)=34,105
-$$
+```
 
-while:
+but:
 
-$$
+```math
 S(19,4)\approx10^{10}
-$$
+```
 
-Therefore, exhaustive search becomes impractical even for relatively small datasets.
+Therefore:
 
-K-means instead searches through only a small subset of possible partitions.
+> **The global search space is finite, but exhaustive search is computationally impractical.**
+
+K-means avoids checking every possible partition and instead follows an iterative path through only a very small subset of them.
 
 ---
 
-## 4. Two Unknown Elements
+## 5. The Two Unknowns
 
-The optimization problem contains two unknowns:
+The objective contains two things that we do not know.
 
-### Cluster assignments
+### A. Cluster Assignments
+
+```math
+C(i)
+```
 
 Which cluster should each observation belong to?
 
-$$
-C(i)
-$$
+### B. Cluster Centroids
 
-### Cluster centroids
+```math
+\mu_1,\mu_2,\ldots,\mu_K
+```
 
-Where should the center of each cluster be?
+Where should each cluster center be located?
 
-$$
-\mu_1,\mu_2,\dots,\mu_K
-$$
+Trying to find the optimal assignments and optimal centroids simultaneously is difficult.
 
-Trying to optimize both simultaneously is difficult.
-
-K-means solves this using **alternating optimization**:
+K-means deals with this through **alternating optimization**:
 
 > Fix one → optimize the other → switch → repeat.
 
 ---
 
-## 5. K-Means Algorithm
+## 6. Initialization
 
-### Step 1 — Initialize Centroids
+Before alternating optimization can begin, K-means needs an initial set of `K` centroids:
 
-Start with \(K\) initial centroids:
+```math
+\mu_1^{(0)},\mu_2^{(0)},\ldots,\mu_K^{(0)}
+```
 
-$$
-\mu_1,\mu_2,\dots,\mu_K
-$$
+A simple initialization is to select `K` observations from the dataset as the initial centroids.
+
+A commonly preferred approach is **K-means++**, which tries to choose better-separated initial centers rather than selecting them completely arbitrarily.
+
+Initialization matters because different starting centroids can lead K-means to different final solutions.
+
+For this reason, K-means can also be run several times using different initializations, keeping the solution with the smallest final WCSS.
 
 ---
 
-### Step 2 — Assignment Step
+## 7. Alternating Optimization
 
-Keep the centroids fixed.
+Once the initial centroids are available, K-means alternates between two simple optimization problems.
 
-Assign every observation to the closest centroid:
+### Step 1 — Fix the Centroids, Optimize the Assignments
 
-$$
+For each observation, calculate its distance from every centroid and assign it to the closest one:
+
+```math
 C(i)
 =
-\arg\min_{1\leq k\leq K}
-\|x_i-\mu_k\|^2
-$$
+\underset{1\leq k\leq K}{\arg\min}
+\;
+\|x_i-\mu_k\|_2^2
+```
 
 Therefore:
 
-$$
+```math
 \text{Fixed centroids}
-\Rightarrow
-\text{Best cluster assignments}
-$$
+\Longrightarrow
+\text{nearest-centroid assignment}
+```
+
+This gives the best cluster assignments **for the current centroids**.
 
 ---
 
-### Step 3 — Centroid Update
+### Step 2 — Fix the Assignments, Optimize the Centroids
 
-Now keep the cluster assignments fixed.
+Now the cluster memberships are known.
 
 For each cluster, calculate the mean of its observations:
 
-$$
+```math
 \mu_k
 =
 \frac{1}{N_k}
 \sum_{x_i\in C_k}x_i
-$$
+```
 
-The mean is the point that minimizes the total squared Euclidean distance of the observations within that cluster.
+The mean is important because:
+
+```math
+\mu_k
+=
+\underset{m}{\arg\min}
+\sum_{x_i\in C_k}
+\|x_i-m\|_2^2
+```
+
+In other words:
+
+> For fixed cluster membership, the arithmetic mean is the point that minimizes the **total squared Euclidean distance** from the observations in that cluster.
 
 Therefore:
 
-$$
+```math
 \text{Fixed assignments}
-\Rightarrow
-\text{Best centroid = mean}
-$$
-
----
-
-### Step 4 — Repeat
-
-Repeat the two steps:
-
-```text
-Assign observations
-        ↓
-Recalculate centroids
-        ↓
-Assign observations again
-        ↓
-Recalculate centroids
-        ↓
-       ...
+\Longrightarrow
+\text{best centroid = cluster mean}
 ```
 
-until the cluster assignments stop changing.
-
 ---
 
-## 6. Why Does the Objective Decrease?
+## 8. Why Does the Objective Keep Decreasing?
 
-K-means is an **iterative greedy descent algorithm**.
+This alternating procedure gives K-means its **greedy descent** behavior.
 
-During the assignment step:
+### Assignment step
 
-* the centroids are fixed,
-* every observation is assigned to its closest centroid,
-* therefore the objective cannot increase.
+The centroids are fixed and every observation is assigned to its closest centroid.
 
-During the centroid-update step:
+Therefore the objective cannot increase.
 
-* the assignments are fixed,
-* each centroid is replaced by the cluster mean,
-* the mean minimizes the within-cluster squared error,
-* therefore the objective again cannot increase.
+### Centroid-update step
 
-Hence:
+The assignments are fixed and every centroid is replaced by the mean, which minimizes the within-cluster squared error.
 
-$$
+Therefore the objective again cannot increase.
+
+Consequently:
+
+```math
 J^{(0)}
 \geq
 J^{(1)}
 \geq
 J^{(2)}
 \geq
-\dots
-$$
-
-The objective either **decreases or remains unchanged** after every step.
-
----
-
-## 7. Convergence vs. Global Optimum
-
-Because each step decreases or preserves the objective, K-means eventually converges.
-
-However:
-
-$$
-\boxed{\text{Convergence} \neq \text{Global Optimum}}
-$$
-
-K-means may converge to a **local minimum** rather than the globally best partition.
-
-Different initial centroids can therefore lead to different solutions.
-
-```text
-Initialization A → Solution A
-Initialization B → Solution B
-Initialization C → Solution C
+\cdots
 ```
 
-A practical strategy is to run K-means several times with different initializations and keep the solution with the smallest objective value.
+At every iteration, the objective either:
+
+* decreases, or
+* remains unchanged.
 
 ---
 
-## 8. Data Type and Distance
+## 9. Why Does K-Means Converge?
 
-Classical K-means is designed for **quantitative / numerical variables**.
+Two important facts come together:
 
-It uses squared Euclidean distance:
+### 1. The objective never increases
 
-$$
+```math
+J^{(t+1)}\leq J^{(t)}
+```
 
-d(x_i,x_j)
-=
-\|x_i-x_j\|^2
-$$
+K-means continually moves toward an equal or better solution.
 
-The use of squared Euclidean distance is important because it makes the **mean** the optimal cluster representative.
+### 2. The number of possible cluster assignments is finite
 
-Therefore:
+Although the number can be extremely large, there are still only finitely many possible assignments of `N` observations to `K` clusters.
 
-> Classical K-means = numerical data + mean centroid + squared Euclidean distance.
+Once an assignment is fixed, its optimal centroids are determined by the corresponding cluster means.
 
-For primarily categorical data, classical K-means is not directly appropriate and related clustering methods should be considered instead.
+Therefore K-means cannot continue producing strictly better assignments indefinitely.
 
----
-
-## 9. Mental Model
+Eventually it reaches a state where the assignments no longer change:
 
 ```text
-                     DATA
-                       │
-                       ▼
-                   Choose K
-                       │
-                       ▼
-              Initialize centroids
-                       │
-                       ▼
-        ┌──────────────────────────┐
-        │     FIX CENTROIDS        │
-        │                          │
-        │ Assign each observation │
-        │ to its nearest centroid  │
-        └─────────────┬────────────┘
-                      │
-                      ▼
-        ┌──────────────────────────┐
-        │     FIX ASSIGNMENTS      │
-        │                          │
-        │ Recalculate each         │
-        │ centroid as the mean     │
-        └─────────────┬────────────┘
-                      │
-                      ▼
-              Objective decreases
-                      │
-                      ▼
-          Assignments unchanged?
-                /             \
-              No               Yes
-              │                 │
-              └── Repeat        ▼
-                               STOP
+Assignments
+    ↓
+Centroids
+    ↓
+Assignments
+    ↓
+Centroids
+    ↓
+...
+    ↓
+No assignment changes
+    ↓
+STOP
+```
+
+This is the convergence criterion in the classical description of K-means.
+
+---
+
+## 10. Convergence Does Not Mean Global Optimum
+
+This is one of the most important properties of K-means:
+
+```math
+\text{Convergence}
+\neq
+\text{Global optimum}
+```
+
+K-means performs a **greedy local search**.
+
+At every step it improves the current solution, but it does not examine all possible cluster assignments.
+
+Therefore it may reach a partition for which no further improvement is found along its current path, while another partition elsewhere in the search space has a smaller objective.
+
+Different initializations may therefore produce:
+
+```text
+Initialization A → Local solution A
+
+Initialization B → Local solution B
+
+Initialization C → Better solution
+```
+
+This is why initialization matters and why trying multiple starting points can be useful.
+
+---
+
+## 11. Complete Mental Model
+
+```text
+                         DATA
+                           │
+                           ▼
+                    Choose number K
+                           │
+                           ▼
+              Define squared Euclidean
+                    dissimilarity
+                           │
+                           ▼
+                 Initialize K centroids
+                           │
+                           ▼
+             ┌─────────────────────────┐
+             │     FIX CENTROIDS       │
+             │                         │
+             │ Assign every point to  │
+             │ its nearest centroid   │
+             └────────────┬────────────┘
+                          │
+                          ▼
+             ┌─────────────────────────┐
+             │     FIX ASSIGNMENTS     │
+             │                         │
+             │ Replace each centroid  │
+             │ by the cluster mean    │
+             └────────────┬────────────┘
+                          │
+                          ▼
+                  Objective decreases
+                          │
+                          ▼
+              Assignments unchanged?
+                    /             \
+                  No               Yes
+                  │                 │
+                  └── Repeat        ▼
+                                   STOP
+                                    │
+                                    ▼
+                           Local solution
 ```
 
 ---
 
-## 10. Key Points to Remember
+## 12. Data-Type Consideration
 
-| Concept                | Principle                                       |
-| ---------------------- | ----------------------------------------------- |
-| Type                   | Unsupervised clustering                         |
-| Input                  | Quantitative / numerical variables              |
-| Number of clusters     | \(K\) is predefined                             |
-| Cluster assignment     | Each observation belongs to exactly one cluster |
-| Distance               | Squared Euclidean distance                      |
-| Cluster representative | Mean / centroid                                 |
-| Objective              | Minimize total within-cluster sum of squares    |
-| Optimization           | Alternating assignment and centroid update      |
-| Behavior               | Objective decreases or remains unchanged        |
-| Convergence            | Guaranteed to reach a stable solution           |
-| Global optimum         | Not guaranteed                                  |
-| Main risk              | Convergence to a local minimum                  |
+Classical K-means is intended for **quantitative variables** because its centroid is an arithmetic mean and its objective uses squared Euclidean distance.
+
+For categorical variables, simply replacing numbers with arbitrary numeric codes and applying classical K-means is generally not appropriate.
+
+Related algorithms exist for other types of data:
+
+| Data Type                     | Typical Method | Cluster Representative |
+| ----------------------------- | -------------- | ---------------------- |
+| Numerical                     | K-means        | Mean                   |
+| Categorical                   | K-modes        | Mode                   |
+| Mixed numerical + categorical | K-prototypes   | Mean + mode            |
+
+Therefore, **K-modes should be viewed as a related extension, not as classical K-means with one small setting changed.**
 
 ---
 
-## Summary
+## 13. Practical Points to Remember
 
-> **K-means searches for a partition that minimizes the total within-cluster sum of squared distances. Since both cluster assignments and centroids are unknown, it uses alternating optimization: with centroids fixed, each observation is assigned to its nearest centroid; with assignments fixed, each centroid is replaced by the mean of its cluster. Each step decreases or preserves the objective, so the algorithm converges, although the final solution may be a local rather than global minimum.**
+### Number of clusters
 
-## Reference
+`K` must be specified before fitting K-means.
 
-This summary is based on the K-means and combinatorial clustering discussion from the supplied statistical learning material, especially the treatment of within-cluster scatter, iterative greedy descent, and alternating optimization.
+Methods such as the **elbow method** or **silhouette analysis**, together with domain knowledge, can help investigate reasonable values of `K`.
+
+### Initialization
+
+Common choices include:
+
+* random initialization;
+* K-means++.
+
+Different starting points can produce different solutions.
+
+### Feature scaling
+
+Because K-means is distance-based, features with much larger numerical scales can dominate the Euclidean distance.
+
+Scaling is therefore usually important when features use different units or ranges.
+
+### Outliers
+
+Squared Euclidean distance gives large distances particularly strong influence, making K-means sensitive to extreme observations.
+
+---
+
+## 14. K-Means in One Paragraph
+
+> **K-means partitions numerical observations into `K` clusters by minimizing the total within-cluster sum of squared Euclidean distances. Each observation is mapped to one and only one cluster, producing a many-to-one assignment from observations to clusters. Because both the assignments and centroids are unknown, K-means uses alternating optimization: with centroids fixed, each observation is assigned to its nearest centroid; with assignments fixed, each centroid becomes the mean of its cluster. Both steps decrease or preserve the objective. Since there are finitely many possible assignments, the algorithm eventually reaches a stable partition. However, because it searches only a small part of the enormous assignment space through greedy descent, the resulting solution can be a local rather than global optimum.**
+
+---
+
+## References
+
+* *The Elements of Statistical Learning* — Chapter 14, Unsupervised Learning
+* Scikit-learn documentation — `KMeans`
