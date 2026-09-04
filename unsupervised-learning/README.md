@@ -59,8 +59,8 @@ Therefore, the classical K-means setting can be summarized as:
 
 For each cluster `k`, let:
 
-* `C_k` be the observations assigned to that cluster;
-* `\mu_k` be its centroid.
+* $C_k$ be the observations assigned to that cluster;
+* $\mu_k$ be its centroid.
 
 K-means minimizes the **total within-cluster sum of squares (WCSS)**:
 
