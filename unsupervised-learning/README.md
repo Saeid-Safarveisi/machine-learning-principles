@@ -43,7 +43,7 @@ K-means needs a way to determine whether observations are close to one another.
 For classical K-means, the dissimilarity measure is **squared Euclidean distance**:
 
 ```math
-d(x_i,x_j)= sum_{u=1}^{p}(x_{iu}- x_{ju})^2 = \|x_i-x_j\|_2^2
+d(x_i,x_j)= \sum_{u=1}^{p}(x_{iu}- x_{ju})^2 = \|x_i-x_j\|_2^2
 ```
 where `p` is the number of covariates. Smaller distance means that two observations are more similar in the feature space.
 
