@@ -22,9 +22,9 @@ $$
 
 where:
 
-* \(i\) represents an observation,
-* \(k \in \{1,\dots,K\}\) represents a cluster,
-* \(C(i)\) tells us which cluster observation \(i\) belongs to.
+- \(i\) represents an observation,
+- \(k \in \{1,\dots,K\}\) represents a cluster,
+- \(C(i)\) tells us which cluster observation \(i\) belongs to.
 
 Therefore, clustering can be viewed as a **many-to-one mapping**:
 
@@ -257,6 +257,7 @@ Classical K-means is designed for **quantitative / numerical variables**.
 It uses squared Euclidean distance:
 
 $$
+
 d(x_i,x_j)
 =
 \|x_i-x_j\|^2
