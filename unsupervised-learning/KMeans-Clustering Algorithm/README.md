@@ -363,16 +363,16 @@ This is why initialization matters and why trying multiple starting points can b
              ┌─────────────────────────┐
              │     FIX CENTROIDS       │
              │                         │
-             │ Assign every point to  │
-             │ its nearest centroid   │
+             │ Assign every point to   │
+             │ its nearest centroid    │
              └────────────┬────────────┘
                           │
                           ▼
              ┌─────────────────────────┐
              │     FIX ASSIGNMENTS     │
              │                         │
-             │ Replace each centroid  │
-             │ by the cluster mean    │
+             │ Replace each centroid   │
+             │ by the cluster mean     │
              └────────────┬────────────┘
                           │
                           ▼
