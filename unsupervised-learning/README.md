@@ -94,35 +94,35 @@ Equivalently:
 
 ---
 
-## 4. Why Is Finding the Best Partition Difficult?
+## Why Is Finding the Best Partition Difficult?
 
-In principle, we could:
+In principle, K-means could examine **every possible partition** of the `N` observations into `K` non-empty clusters and choose the partition with the smallest within-cluster sum of squares.
 
-1. generate every possible assignment of `N` observations to `K` clusters;
-2. calculate the objective for each partition;
-3. choose the partition with the smallest objective.
+Let
 
-The search space is **finite**, because there are only finitely many ways to assign a finite number of observations to `K` clusters.
+```math
+P(N,K)
+```
 
-However, the number of possible partitions grows extremely quickly.
+denote the number of distinct ways to partition `N` observations into `K` non-empty clusters, ignoring differences that are only caused by renaming the cluster labels.
+
+This number is **finite**, but it grows extremely quickly as `N` and `K` increase.
 
 For example:
 
 ```math
-S(10,4)=34,105
+P(10,4)=34{,}105
 ```
 
-but:
+while already:
 
 ```math
-S(19,4)\approx10^{10}
+P(19,4)\approx 10^{10}
 ```
 
-Therefore:
+Therefore, although an optimal partition exists among a finite number of possibilities, checking every possible partition quickly becomes computationally impractical.
 
-> **The global search space is finite, but exhaustive search is computationally impractical.**
-
-K-means avoids checking every possible partition and instead follows an iterative path through only a very small subset of them.
+K-means does **not** search this entire space. Instead, starting from an initial solution, it examines only a small sequence of partitions and greedily moves toward solutions with a smaller objective value.
 
 ---
 
