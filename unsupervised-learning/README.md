@@ -1,6 +1,6 @@
 # K-Means Clustering
 
-K-means is an **unsupervised, partition-based clustering algorithm** used to divide observations into a predefined number of clusters, `K`, so that observations belonging to the same cluster are as similar as possible.
+K-means is an **unsupervised clustering algorithm** used to divide observations into a predefined number of clusters, `K`, so that observations belonging to the same cluster are as similar as possible.
 
 For classical K-means:
 
@@ -17,7 +17,7 @@ Suppose we have `N` observations and `K` clusters, where `K < N`.
 
 The cluster assignment can be represented as:
 
-```
+```math
 C(i) = k
 ```
 
